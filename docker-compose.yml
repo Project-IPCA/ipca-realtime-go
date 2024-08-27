@@ -1,0 +1,16 @@
+services:
+  ipca-realtime:
+    container_name: ipca-realtime
+    build: .
+    ports:
+      - ${SERVER_EXPOSE_PORT}:${SERVER_PORT}
+    restart: on-failure
+    volumes:
+      - ./:/app/
+    env_file:
+      - .env
+    networks:
+      - programming-laboratory-management-system_default
+networks:
+  programming-laboratory-management-system_default :
+    external: true
