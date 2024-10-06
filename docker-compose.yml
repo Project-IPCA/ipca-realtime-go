@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     networks:
-      - programming-laboratory-management-system_default
+      - ipca-stack
 networks:
-  programming-laboratory-management-system_default :
+  ipca-stack :
     external: true

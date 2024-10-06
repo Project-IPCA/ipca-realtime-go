@@ -37,11 +37,8 @@ func (handler *ClassLogHandler) ConsumeClassLog(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, "Streaming unsupported!")
 	}
 
-	var classLog []models.ActivityLogOld
+	var classLog []models.ActivityLog
 	classLogRepository.GetActivityLogOld(&classLog,groupID)
-
-	fmt.Println("test")
-	fmt.Println(classLog)
 
 	initialData, err := json.Marshal(classLog)
 	if err != nil {

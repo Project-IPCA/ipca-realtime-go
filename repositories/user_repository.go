@@ -30,12 +30,11 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 }
 
 func (userRepository *UserRepository)GetOnlineStudentsOld(userIDs *[]string,group_id string){
-	userRepository.DB.Raw(`
-    SELECT user.id
-    FROM user
-    JOIN user_student ON user.id = user_student.stu_id
-    WHERE user_student.stu_group = ? AND user.status = ?
-	`, group_id , "online").Scan(&userIDs)
+	userRepository.DB.Table("students").
+	Select("students.stu_id").
+	Joins("JOIN users ON students.stu_id = users.user_id").
+	Where("students.group_id = ? AND users.is_online = ?", group_id, true).
+	Find(userIDs)
 }
 
 func (userRepository *UserRepository)UpdateUserStatus(userID string,status bool){

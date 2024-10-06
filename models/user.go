@@ -27,7 +27,7 @@ type User struct {
 	AddedBy    *string     `gorm:"type:varchar(40)"`
 	CISession  *int        `gorm:"column:ci_session"`
 	SessionID  *string     `gorm:"column:session_id;type:varchar(50)"`
-	Student    Student     `gorm:"foreignKey:StuID"`
+	Student    *Student    `gorm:"foreignKey:StuID"`
 }
 
 func (User) TableName() string {

@@ -15,7 +15,7 @@ import (
 
 type OnlineStudentMessage struct {
 	Action string `json:"action"`
-	ID     string    `json:"id"`
+	ID     string    `json:"user_id"`
 }
 
 type OnlineStudentsHandler struct {

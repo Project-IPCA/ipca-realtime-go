@@ -25,10 +25,6 @@ func NewClassLogRepository(db *gorm.DB) *ClassLogRepository {
 	return &ClassLogRepository{DB: db}
 }
 
-func (classLogRepository *ClassLogRepository)GetActivityLogOld(activityLog *[]models.ActivityLogOld,group_id string){
-	classLogRepository.DB.Raw(`
-    SELECT *
-  	FROM activity_logs
-  	WHERE group_id = ?
-	`, group_id ).Scan(&activityLog)
+func (classLogRepository *ClassLogRepository)GetActivityLogOld(activityLog *[]models.ActivityLog,group_id string){
+	classLogRepository.DB.Where("group_id",group_id).Find(&activityLog)
 }
