@@ -18,6 +18,7 @@ func ConfigureRoutes(server *s.Server){
 
 	server.Echo.GET("/swagger/*", echoSwagger.WrapHandler)
 	server.Echo.Use(middleware.Logger())
+	server.Echo.Use(middleware.CORS())
 
 	apiGroup := server.Echo.Group("/subscribe")
 
