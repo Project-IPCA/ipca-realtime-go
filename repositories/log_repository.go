@@ -11,10 +11,6 @@ type ClassLogRepositoryQ interface{
 		activityLog *[]models.ActivityLog,
 		group_id string,
 	)
-	GetActivityLogOld(
-		activityLog *[]models.ActivityLog,
-		group_id string,
-	)
 }
 
 type ClassLogRepository struct {
@@ -25,6 +21,6 @@ func NewClassLogRepository(db *gorm.DB) *ClassLogRepository {
 	return &ClassLogRepository{DB: db}
 }
 
-func (classLogRepository *ClassLogRepository)GetActivityLogOld(activityLog *[]models.ActivityLog,group_id string){
+func (classLogRepository *ClassLogRepository)GetActivityLog(activityLog *[]models.ActivityLog,group_id string){
 	classLogRepository.DB.Where("group_id",group_id).Find(&activityLog)
 }
