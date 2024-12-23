@@ -5,12 +5,10 @@ services:
     ports:
       - ${SERVER_EXPOSE_PORT}:${SERVER_PORT}
     restart: on-failure
-    volumes:
-      - ./:/app/
     env_file:
       - .env
     networks:
       - ipca-stack
 networks:
-  ipca-stack :
+  ipca-stack:
     external: true

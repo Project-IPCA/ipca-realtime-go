@@ -8,6 +8,7 @@ RUN apk update && apk add --no-cache git
 # Set the current working directory inside the container
 WORKDIR /app
 
+COPY . .
 
 RUN go install github.com/githubnemo/CompileDaemon@latest
 RUN go install github.com/swaggo/swag/cmd/swag@v1.8.10
