@@ -5,7 +5,7 @@ pipeline {
             steps {
                 script {
                     echo "BRANCH_NAME: ${env.BRANCH_NAME}"
-                    if (env.BRANCH_NAME == 'master') {
+                    if (env.BRANCH_NAME == 'main') {
                         agent_label = 'master-agent'
                         docker_compose_file = 'docker-compose.prod.yml'
                         credentialsId = 'realtime-prod'
