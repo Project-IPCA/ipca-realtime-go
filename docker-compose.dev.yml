@@ -12,5 +12,5 @@ services:
     networks:
       - ipca-stack
 networks:
-  ipca-stack :
+  ipca-stack:
     external: true
