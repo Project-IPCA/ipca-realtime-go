@@ -38,7 +38,7 @@ func (handler *ClassLogHandler) ConsumeClassLog(c echo.Context) error {
 	}
 
 	var classLog []models.ActivityLog
-	classLogRepository.GetActivityLogOld(&classLog,groupID)
+	classLogRepository.GetActivityLog(&classLog,groupID)
 
 	initialData, err := json.Marshal(classLog)
 	if err != nil {

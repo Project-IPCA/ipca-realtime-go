@@ -15,7 +15,7 @@ import (
 
 type ResponseData struct {
 	Status  bool   `json:"status"`
-    Message string `json:"message"`
+	Message string `json:"message"`
 }
 
 type userConnectionHandler struct {
@@ -26,21 +26,20 @@ func NewuserConnectionHandler(server *s.Server) *userConnectionHandler {
 	return &userConnectionHandler{server: server}
 }
 
-func (userConnectionHanuserConnectionHandler *userConnectionHandler)ConsumeUserConnection(c echo.Context) error {
-	subscriber := redis_client.Init(userConnectionHanuserConnectionHandler.server.Config);
+func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUserConnection(c echo.Context) error {
+	subscriber := redis_client.Init(userConnectionHanuserConnectionHandler.server.Config)
 	userRepository := repositories.NewUserRepository(userConnectionHanuserConnectionHandler.server.DB)
 	defer subscriber.Close()
 
-	groupID := c.Param("group_id")
-	userID := c.QueryParam("id")
+	userID := c.Param("user_id")
 
 	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
-    c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
-    c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
 
-	userRepository.UpdateUserStatus(userID,true)
+	userRepository.UpdateUserStatus(userID, true)
 
-	pubsub := subscriber.Subscribe(context.Background(), fmt.Sprintf("login-repeat:%s", groupID))
+	pubsub := subscriber.Subscribe(context.Background(), fmt.Sprintf("user-event:%s", userID))
 	defer pubsub.Close()
 
 	flusher, ok := c.Response().Writer.(http.Flusher)
@@ -58,23 +57,35 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler)ConsumeUserC
 				return
 			}
 
-			if(data.Action == "repeat-login" && data.ID == userID){
-				sendData := ResponseData{
-					Status : false,
+			var sendData ResponseData
+			if data.Action == "repeat-login" {
+				sendData = ResponseData{
+					Status:  false,
 					Message: "repeat-login",
 				}
-				sendDataRaw, err := json.Marshal(sendData)
-				if err != nil {
-					fmt.Println("Failed to marshal updated data:", err)
-					return
+			} else if data.Action == "reject-submission" {
+				sendData = ResponseData{
+					Status:  true,
+					Message: "reject-submission",
 				}
-				fmt.Fprintf(c.Response().Writer, "data: %s\n\n", sendDataRaw)
-				flusher.Flush()
+			} else if data.Action == "can-submit" {
+				sendData = ResponseData{
+					Status:  true,
+					Message: "can-submit",
+				}
 			}
+
+			sendDataRaw, err := json.Marshal(sendData)
+			if err != nil {
+				fmt.Println("Failed to marshal updated data:", err)
+				return
+			}
+			fmt.Fprintf(c.Response().Writer, "data: %s\n\n", sendDataRaw)
+			flusher.Flush()
 		}
 	}()
 
-	<- c.Request().Context().Done()
+	<-c.Request().Context().Done()
 
 	userRepository.UpdateUserStatus(userID, false)
 	pubsub.Unsubscribe(context.Background())

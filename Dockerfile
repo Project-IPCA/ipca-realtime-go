@@ -8,6 +8,7 @@ RUN apk update && apk add --no-cache git
 # Set the current working directory inside the container
 WORKDIR /app
 
+COPY . .
 
 RUN go install github.com/githubnemo/CompileDaemon@latest
 RUN go install github.com/swaggo/swag/cmd/swag@v1.8.10
@@ -17,5 +18,6 @@ RUN chmod +x /wait
 
 #Command to run the executable
 CMD swag init -g cmd/main.go\
+  && chmod -R 777 /app/docs \
   && /wait \
   && CompileDaemon --build="go build cmd/main.go"  --command="./main" --color
