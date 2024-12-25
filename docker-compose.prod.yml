@@ -3,12 +3,29 @@ services:
     container_name: ipca-realtime
     build: .
     ports:
-      - ${SERVER_EXPOSE_PORT}:${SERVER_PORT}
+      - ${RT_SERVER_EXPOSE_PORT}:${RT_SERVER_PORT}
     restart: unless-stopped
-    env_file:
-      - .env
+    environment:
+      SERVER_HOST: ${RT_SERVER_HOST}
+      SERVER_PORT: ${RT_SERVER_PORT}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DRIVER: ${DB_DRIVER}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      ACCESS_SECRET: ${ACCESS_SECRET}
+      REFRESH_SECRET: ${REFRESH_SECRET}
     networks:
       - ipca-stack
+    depends_on:
+      - redis
+      - ipca-mysql
+      - ipca-api
 networks:
   ipca-stack:
     external: true
