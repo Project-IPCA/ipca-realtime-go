@@ -9,6 +9,9 @@ services:
       - ./:/app/
     env_file:
       - .env
+    environment:
+      SERVER_PORT: ${RT_SERVER_PORT}
+      SERVER_HOST: ${RT_SERVER_HOST}
     networks:
       - ipca-stack
 networks:
