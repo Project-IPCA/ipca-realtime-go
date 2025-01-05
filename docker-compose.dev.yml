@@ -3,7 +3,7 @@ services:
     container_name: ipca-realtime
     build: .
     ports:
-      - ${SERVER_EXPOSE_PORT}:${SERVER_PORT}
+      - ${RT_SERVER_EXPOSE_PORT}:${RT_SERVER_PORT}
     restart: on-failure
     volumes:
       - ./:/app/
