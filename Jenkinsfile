@@ -27,7 +27,7 @@ pipeline {
                         } else {
                             dir("${WORKSPACE_DIR}") {
                                 sh "cat ${env_file} > .env"
-                                sh "cd ipca-realtime"
+                                sh "cd ipca-realtime-go"
                                 sh "git fetch"
                                 sh "git pull origin main"
                                 sh "cd .."
