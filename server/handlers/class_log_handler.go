@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"context"
-	"encoding/json"
+	// "encoding/json"
 	"fmt"
 	"net/http"
 
@@ -39,13 +39,6 @@ func (handler *ClassLogHandler) ConsumeClassLog(c echo.Context) error {
 
 	var classLog []models.ActivityLog
 	classLogRepository.GetActivityLog(&classLog,groupID)
-
-	initialData, err := json.Marshal(classLog)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, "Failed to marshal initial data")
-	}
-	fmt.Fprintf(c.Response().Writer, "data: %s\n\n", initialData)
-	flusher.Flush()
 
 	pubsub := subscriber.Subscribe(context.Background(), fmt.Sprintf("logs:%s", groupID))
 	defer pubsub.Close()
