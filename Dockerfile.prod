@@ -1,0 +1,40 @@
+# Start from golang base image for building the application
+FROM golang:1.22.6-alpine3.20 as builder
+
+# Install git and other dependencies
+RUN apk update && apk add --no-cache git
+
+# Set the current working directory inside the container
+WORKDIR /app
+
+# Copy the source code into the container
+COPY . .
+
+# Install swag for generating API documentation
+RUN go install github.com/swaggo/swag/cmd/swag@v1.8.10
+
+# Generate the API documentation
+RUN swag init -g cmd/main.go
+
+# Build the Go application
+RUN go build -o /app/main cmd/main.go
+
+# Start a new stage from a minimal base image
+FROM alpine:3.20
+
+# Install necessary dependencies
+RUN apk add --no-cache ca-certificates
+
+# Set the current working directory inside the container
+WORKDIR /root/
+
+# Copy the built application from the builder stage
+COPY --from=builder /app/main .
+COPY --from=builder /app/docs ./docs
+
+# Add the wait script
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.7.3/wait /wait
+RUN chmod +x /wait
+
+# Command to run the executable
+CMD /wait && ./main
