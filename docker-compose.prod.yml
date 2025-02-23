@@ -1,7 +1,9 @@
 services:
   ipca-realtime:
     container_name: ipca-realtime
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
     ports:
       - ${RT_SERVER_EXPOSE_PORT}:${RT_SERVER_PORT}
     restart: unless-stopped
