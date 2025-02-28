@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 	"net/http"
-	"context"
 
 	"github.com/labstack/echo/v4"
 
@@ -19,15 +19,15 @@ func NewTestCaseResultHandler(server *s.Server) *TestCaseResultHandler {
 	return &TestCaseResultHandler{server: server}
 }
 
-func (testCaseResultHandler *TestCaseResultHandler)ConsumeTestCaseResult(c echo.Context) error {
-	subscriber := redis_client.Init(testCaseResultHandler.server.Config);
+func (testCaseResultHandler *TestCaseResultHandler) ConsumeTestCaseResult(c echo.Context) error {
+	subscriber := redis_client.Init(testCaseResultHandler.server.Config)
 	defer subscriber.Close()
 
 	jobID := c.Param("job_id")
 
 	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
-    c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
-    c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
+	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
+	c.Response().Header().Set(echo.HeaderConnection, "keep-alive")
 
 	pubsub := subscriber.Subscribe(context.Background(), fmt.Sprintf("testcase-result:%s", jobID))
 	defer pubsub.Close()
@@ -45,7 +45,7 @@ func (testCaseResultHandler *TestCaseResultHandler)ConsumeTestCaseResult(c echo.
 		}
 	}()
 
-	<- c.Request().Context().Done()
+	<-c.Request().Context().Done()
 
 	pubsub.Unsubscribe(context.Background())
 	pubsub.Close()

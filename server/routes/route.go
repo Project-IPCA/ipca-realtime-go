@@ -30,7 +30,7 @@ func ConfigureRoutes(server *s.Server) {
 
 	apiAuthGroup.GET("/group-permission/:group_id", groupPermissionHandler.ConsumeGroupPermission)
 	apiAuthGroup.GET("/class-log/:group_id", classLogHandler.ConsumeClassLog)
-	apiAuthGroup.GET("/online-students/:group_id", onlineStudentsOldHandler.ConsumeOnlineStudentOld)
+	apiAuthGroup.GET("/online-students/:group_id", onlineStudentsOldHandler.ConsumeOnlineStudent)
 	apiAuthGroup.GET("/submission-result/:job_id", submitionResultHandler.ConsumeSubmitionResult)
 	apiAuthGroup.GET("/testcase-result/:job_id", testCaseResultHandler.ConsumeTestCaseResult)
 	apiAuthGroup.GET("/user/connection/:user_id", userConnectionHandler.ConsumeUserConnection)
