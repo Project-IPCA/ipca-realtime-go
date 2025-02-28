@@ -146,20 +146,19 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUser
 	if conn.TabCount <= 0 {
 		delete(userConnections, userID)
 		userRepository.UpdateUserStatus(userID, false)
+		fmt.Println("disconnect all")
 		if isStudent {
-			if isStudent {
-				message := RedisMessage{
-					Action: "logout",
-					UserID: userID,
-				}
-				body, err := json.Marshal(message)
-				if err != nil {
-					return echo.NewHTTPError(http.StatusInternalServerError, "failed to marshal message to JSON: "+err.Error())
-				}
-				err = pubsub.Publish(context.Background(), fmt.Sprintf("online-students:%s", existsUser.Student.GroupID), body).Err()
-				if err != nil {
-					return echo.NewHTTPError(http.StatusInternalServerError, "can't publish message: "+err.Error())
-				}
+			message := RedisMessage{
+				Action: "logout",
+				UserID: userID,
+			}
+			body, err := json.Marshal(message)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "failed to marshal message to JSON: "+err.Error())
+			}
+			err = pubsub.Publish(context.Background(), fmt.Sprintf("online-students:%s", existsUser.Student.GroupID), body).Err()
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "can't publish message: "+err.Error())
 			}
 		}
 	}
