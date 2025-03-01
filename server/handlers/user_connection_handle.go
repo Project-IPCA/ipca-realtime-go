@@ -89,6 +89,9 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUser
 
 	userRepository.UpdateUserStatus(userID, true)
 
+	ctx, cancel := context.WithCancel(c.Request().Context())  
+    defer cancel() 
+
 	subscriber := pubsub.Subscribe(context.Background(), fmt.Sprintf("user-event:%s", userID))
 	defer subscriber.Close()
 
@@ -99,43 +102,40 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUser
 
 	go func() {
 		ch := subscriber.Channel()
-		for msg := range ch {
-			var data OnlineStudentMessage
-			if err := json.Unmarshal([]byte(msg.Payload), &data); err != nil {
-				fmt.Println(msg.Payload)
-				fmt.Println("Failed to unmarshal message:", err)
-				return
-			}
+		for {  
+            select {  
+            case <-ctx.Done():  
+                return  
+            case msg := <-ch:  
+                var data OnlineStudentMessage  
+                if err := json.Unmarshal([]byte(msg.Payload), &data); err != nil {  
+                    continue  
+                }  
 
-			var sendData ResponseData
-			if data.Action == "repeat-login" {
-				sendData = ResponseData{
-					Status:  false,
-					Message: "repeat-login",
-				}
-			} else if data.Action == "reject-submission" {
-				sendData = ResponseData{
-					Status:  true,
-					Message: "reject-submission",
-				}
-			} else if data.Action == "can-submit" {
-				sendData = ResponseData{
-					Status:  true,
-					Message: "can-submit",
-				}
-			}
+                var sendData ResponseData  
+                switch data.Action {  
+                case "repeat-login":  
+                    sendData = ResponseData{Status: false, Message: "repeat-login"}  
+                case "reject-submission":  
+                    sendData = ResponseData{Status: true, Message: "reject-submission"}  
+                case "can-submit":  
+                    sendData = ResponseData{Status: true, Message: "can-submit"}  
+                default:  
+                    continue  
+                }  
 
-			sendDataRaw, err := json.Marshal(sendData)
-			if err != nil {
-				fmt.Println("Failed to marshal updated data:", err)
-				return
-			}
-			fmt.Fprintf(c.Response().Writer, "data: %s\n\n", sendDataRaw)
-			flusher.Flush()
-		}
+                rawData, err := json.Marshal(sendData)  
+                if err != nil {  
+                    continue  
+                }  
+                
+                fmt.Fprintf(c.Response().Writer, "data: %s\n\n", rawData)  
+                flusher.Flush()  
+            }  
+        }  
 	}()
 
-	<-c.Request().Context().Done()
+	<-ctx.Done()
 
 	conn.TabCount--
 	if conn.TabCount <= 0 {
