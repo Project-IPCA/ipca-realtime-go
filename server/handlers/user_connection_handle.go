@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"sync"
 
 	"github.com/labstack/echo/v4"
 
@@ -31,7 +30,6 @@ type UserConnection struct {
 
 var (
 	userConnections = make(map[string]*UserConnection)
-	mu              sync.Mutex
 )
 
 func NewuserConnectionHandler(server *s.Server) *userConnectionHandler {
@@ -59,7 +57,6 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUser
 		isStudent = true
 	}
 
-	mu.Lock()
 	conn, exists := userConnections[userID]
 	if !exists {
 		conn = &UserConnection{
@@ -85,7 +82,6 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUser
 	} else {
 		conn.TabCount++
 	}
-	mu.Unlock()
 
 	c.Response().Header().Set(echo.HeaderContentType, "text/event-stream")
 	c.Response().Header().Set(echo.HeaderCacheControl, "no-cache")
@@ -141,7 +137,6 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUser
 
 	<-c.Request().Context().Done()
 
-	mu.Lock()
 	conn.TabCount--
 	if conn.TabCount <= 0 {
 		delete(userConnections, userID)
@@ -162,7 +157,6 @@ func (userConnectionHanuserConnectionHandler *userConnectionHandler) ConsumeUser
 			}
 		}
 	}
-	mu.Unlock()
 
 	subscriber.Unsubscribe(context.Background())
 	subscriber.Close()
