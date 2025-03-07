@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/Project-IPCA/ipca-realtime-go/redis_client"
 	"github.com/Project-IPCA/ipca-realtime-go/repositories"
@@ -15,7 +14,7 @@ import (
 
 type OnlineStudentMessage struct {
 	Action string `json:"action"`
-	ID     string    `json:"user_id"`
+	ID     string `json:"user_id"`
 }
 
 type OnlineStudentsHandler struct {
@@ -26,7 +25,7 @@ func NewOnlineStudentsHandler(server *s.Server) *OnlineStudentsHandler {
 	return &OnlineStudentsHandler{server: server}
 }
 
-func (handler *OnlineStudentsHandler) ConsumeOnlineStudentOld(c echo.Context) error {
+func (handler *OnlineStudentsHandler) ConsumeOnlineStudent(c echo.Context) error {
 	subscriber := redis_client.Init(handler.server.Config)
 	userRepository := repositories.NewUserRepository(handler.server.DB)
 	defer subscriber.Close()
@@ -88,32 +87,11 @@ func (handler *OnlineStudentsHandler) ConsumeOnlineStudentOld(c echo.Context) er
 		}
 	}()
 
-	ticker := time.NewTicker(10 * time.Second)
-	defer ticker.Stop()
-
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				userRepository.GetOnlineStudentsOld(&userID, groupID)
-				tickerData, err := json.Marshal(userID)
-				if err != nil {
-					fmt.Println("Failed to marshal ticker data:", err)
-					continue
-				}
-				fmt.Fprintf(c.Response().Writer, "data: %s\n\n", tickerData)
-				flusher.Flush()
-			case <-c.Request().Context().Done():
-				return
-			}
-		}
-	}()
-
-	<- c.Request().Context().Done()
+	<-c.Request().Context().Done()
 
 	pubsub.Unsubscribe(context.Background())
 	pubsub.Close()
-	
+
 	return nil
 }
 

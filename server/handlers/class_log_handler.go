@@ -38,7 +38,7 @@ func (handler *ClassLogHandler) ConsumeClassLog(c echo.Context) error {
 	}
 
 	var classLog []models.ActivityLog
-	classLogRepository.GetActivityLog(&classLog,groupID)
+	classLogRepository.GetActivityLog(&classLog, groupID)
 
 	pubsub := subscriber.Subscribe(context.Background(), fmt.Sprintf("logs:%s", groupID))
 	defer pubsub.Close()
@@ -51,10 +51,10 @@ func (handler *ClassLogHandler) ConsumeClassLog(c echo.Context) error {
 		}
 	}()
 
-	<- c.Request().Context().Done()
+	<-c.Request().Context().Done()
 
 	pubsub.Unsubscribe(context.Background())
 	pubsub.Close()
-	
+
 	return nil
 }

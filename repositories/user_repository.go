@@ -6,7 +6,7 @@ import (
 	"github.com/Project-IPCA/ipca-realtime-go/models"
 )
 
-type UserRepositoryQ interface{
+type UserRepositoryQ interface {
 	GetOnlineStudents(
 		user *models.User,
 		group_id string,
@@ -29,14 +29,18 @@ func NewUserRepository(db *gorm.DB) *UserRepository {
 	return &UserRepository{DB: db}
 }
 
-func (userRepository *UserRepository)GetOnlineStudentsOld(userIDs *[]string,group_id string){
+func (userRepository *UserRepository) GetOnlineStudentsOld(userIDs *[]string, group_id string) {
 	userRepository.DB.Table("students").
-	Select("students.stu_id").
-	Joins("JOIN users ON students.stu_id = users.user_id").
-	Where("students.group_id = ? AND users.is_online = ?", group_id, true).
-	Find(userIDs)
+		Select("students.stu_id").
+		Joins("JOIN users ON students.stu_id = users.user_id").
+		Where("students.group_id = ? AND users.is_online = ?", group_id, true).
+		Find(userIDs)
 }
 
-func (userRepository *UserRepository)UpdateUserStatus(userID string,status bool){
+func (userRepository *UserRepository) UpdateUserStatus(userID string, status bool) {
 	userRepository.DB.Model(&models.User{}).Where("user_id = ?", userID).Update("is_online", status)
+}
+
+func (userRepository *UserRepository) GetUser(user *models.User, userID string) {
+	userRepository.DB.Preload("Student").Where("user_id = ?", userID).Find(&user)
 }

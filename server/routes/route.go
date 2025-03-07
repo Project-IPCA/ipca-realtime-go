@@ -1,8 +1,10 @@
 package routes
 
 import (
+	"github.com/Project-IPCA/ipca-realtime-go/middlewares"
 	s "github.com/Project-IPCA/ipca-realtime-go/server"
 	"github.com/Project-IPCA/ipca-realtime-go/server/handlers"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
 )
@@ -19,12 +21,17 @@ func ConfigureRoutes(server *s.Server) {
 	server.Echo.Use(middleware.Logger())
 	server.Echo.Use(middleware.CORS())
 
-	apiGroup := server.Echo.Group("/subscribe")
+	authMiddleware := middlewares.NewAuthMiddleware(server)
+	jwtConfig := authMiddleware.GetJwtConfig()
 
-	apiGroup.GET("/group-permission/:group_id", groupPermissionHandler.ConsumeGroupPermission)
-	apiGroup.GET("/class-log/:group_id", classLogHandler.ConsumeClassLog)
-	apiGroup.GET("/online-students/:group_id", onlineStudentsOldHandler.ConsumeOnlineStudentOld)
-	apiGroup.GET("/submission-result/:job_id", submitionResultHandler.ConsumeSubmitionResult)
-	apiGroup.GET("/testcase-result/:job_id", testCaseResultHandler.ConsumeTestCaseResult)
-	apiGroup.GET("/user/connection/:user_id", userConnectionHandler.ConsumeUserConnection)
+	apiGroup := server.Echo.Group("/subscribe")
+	apiAuthGroup := apiGroup
+	apiAuthGroup.Use(echojwt.WithConfig(jwtConfig))
+
+	apiAuthGroup.GET("/group-permission/:group_id", groupPermissionHandler.ConsumeGroupPermission)
+	apiAuthGroup.GET("/class-log/:group_id", classLogHandler.ConsumeClassLog)
+	apiAuthGroup.GET("/online-students/:group_id", onlineStudentsOldHandler.ConsumeOnlineStudent)
+	apiAuthGroup.GET("/submission-result/:job_id", submitionResultHandler.ConsumeSubmitionResult)
+	apiAuthGroup.GET("/testcase-result/:job_id", testCaseResultHandler.ConsumeTestCaseResult)
+	apiAuthGroup.GET("/user/connection/:user_id", userConnectionHandler.ConsumeUserConnection)
 }
