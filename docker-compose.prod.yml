@@ -5,9 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile.prod
     ports:
-      - ${RT_SERVER_EXPOSE_PORT}:${RT_SERVER_PORT}
+      - '127.0.0.1:${RT_SERVER_EXPOSE_PORT}:${RT_SERVER_PORT}'
     restart: unless-stopped
     environment:
+      TZ: Asia/Bangkok
       SERVER_HOST: ${RT_SERVER_HOST}
       SERVER_PORT: ${RT_SERVER_PORT}
       DB_HOST: ${DB_HOST}
